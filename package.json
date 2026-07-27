@@ -1,0 +1,15 @@
+{
+  "name": "apify-mcp-server-railway",
+  "version": "1.0.0",
+  "description": "Self-host the Apify MCP Server on Railway",
+  "main": "entrypoint.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node entrypoint.mjs"
+  },
+  "dependencies": {
+    "@apify/actors-mcp-server": "latest",
+    "@modelcontextprotocol/sdk": "latest",
+    "express": "latest"
+  }
+}
