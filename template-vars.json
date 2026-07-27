@@ -1,0 +1,7 @@
+{
+  "APIFY_TOKEN": {
+    "value": "",
+    "description": "Your Apify API token for authentication. Get it from https://console.apify.com/settings/integrations",
+    "isOptional": false
+  }
+}
