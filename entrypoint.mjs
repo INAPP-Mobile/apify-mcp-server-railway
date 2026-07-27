@@ -1,12 +1,11 @@
 // Railway entrypoint for Apify MCP Server
-// Adds a health check endpoint and patches the bind address
+// Adds a health check endpoint and binds to 0.0.0.0 for Railway compatibility
 
-// Patch process.env before the dev server loads
-process.env.BIND_ADDRESS = '0.0.0.0';
-
-import { createExpressApp } from './dev_server.js';
+import { createExpressApp } from './dist/dev_server.js';
 
 const PORT = Number(process.env.PORT) || 3001;
+const HOST = '0.0.0.0';
+
 const app = createExpressApp();
 
 // Add a health check that responds before MCP session logic
@@ -22,8 +21,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Apify MCP Server listening on 0.0.0.0:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Apify MCP Server listening on ${HOST}:${PORT}`);
 });
 
 process.on('SIGINT', () => {
