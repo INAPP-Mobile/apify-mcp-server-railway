@@ -1,44 +1,60 @@
-# Stage 1: Build the Apify MCP Server from source
+# Apify MCP Server on Railway
+# Uses the published npm package @apify/actors-mcp-server
+
 FROM node:24-alpine AS builder
 
 RUN corepack enable
 
 WORKDIR /app
 
-# Clone the repo at the latest stable release
-RUN apk add --no-cache git && \
-    git clone --depth 1 --branch v0.13.0 https://github.com/apify/apify-mcp-server.git . && \
-    rm -rf .git
+# Create minimal workspace files for pnpm install
+RUN mkdir -p src/web
+COPY <<'EOF' ./package.json
+{
+  "name": "apify-mcp-server-railway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.11.0",
+  "dependencies": {
+    "@apify/actors-mcp-server": "0.13.0",
+    "express": "^4.21.2",
+    "@modelcontextprotocol/sdk": "1.29.0"
+  }
+}
+EOF
 
-# Install all dependencies (dev + prod)
-RUN pnpm install --frozen-lockfile
+COPY <<'EOF' ./pnpm-workspace.yaml
+packages:
+  - '.'
+  - 'src/web'
+EOF
 
-# Build the project (tsc -b src)
-RUN pnpm run build
+COPY <<'EOF' ./src/web/package.json
+{
+  "name": "@apify/mcp-web-widget",
+  "version": "0.0.0",
+  "private": true
+}
+EOF
 
-# Stage 2: Runtime image
+# Generate lockfile
+RUN pnpm install --frozen-lockfile 2>/dev/null; pnpm install
+
+# Stage 2: Runtime
 FROM node:24-alpine
 
 RUN corepack enable
 
 WORKDIR /app
 
-# Copy the full build for pnpm deploy
-COPY --from=builder /app /build
-
-# Deploy production dependencies only
-RUN cd /build && pnpm deploy --legacy --filter "@apify/actors-mcp-server" --prod /app && rm -rf /build
-
-# Copy compiled output and runtime assets
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server.json ./
+# Copy installed packages
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 
-# Copy Railway entrypoint wrapper
+# Copy the entrypoint
 COPY entrypoint.mjs ./
 
-# Railway provides PORT env var; the dev server reads it (default 3001)
 EXPOSE 8080
 
-# Run via entrypoint that adds health check and binds to 0.0.0.0
 ENTRYPOINT ["node", "entrypoint.mjs"]
