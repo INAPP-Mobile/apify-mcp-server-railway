@@ -8,8 +8,8 @@
     "start": "node entrypoint.mjs"
   },
   "dependencies": {
-    "@apify/actors-mcp-server": "latest",
-    "@modelcontextprotocol/sdk": "latest",
-    "express": "latest"
+    "@apify/actors-mcp-server": "0.13.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "express": "5.2.1"
   }
 }
