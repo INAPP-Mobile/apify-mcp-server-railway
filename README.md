@@ -4,19 +4,43 @@
 
 Self-host the [Apify MCP Server](https://github.com/apify/apify-mcp-server) on Railway. This gives your AI assistants (Claude, Cursor, Windsurf, etc.) access to thousands of Apify Actors for web scraping, data extraction, and automation — via the Model Context Protocol (MCP).
 
-## Features
+## Deploy and Host
 
-- **Hosted MCP endpoint** — Exposes Apify's MCP server via Streamable HTTP transport on a Railway public URL
-- **Thousands of Actors** — Access the full [Apify Store](https://apify.com/store) of scrapers and automations
-- **Bearer auth** — Secure your endpoint with your Apify API token
-- **Zero configuration** — Deploy with just your Apify API token
+Deploy the Apify MCP Server on Railway with a single click. The template provisions a Node.js server that exposes Apify's MCP interface via Streamable HTTP transport, ready for any MCP-compatible client.
+
+## Dependencies for
+
+- **Apify API token** — Required for authentication. Get one at [console.apify.com](https://console.apify.com/settings/integrations)
+- **MCP-compatible client** — Claude Desktop, Cursor, Windsurf, or any client supporting MCP Streamable HTTP
+
+### Deployment Dependencies
+
+Railway handles all infrastructure — no server management needed. The template uses the NIXPACKS builder with Node.js and npm dependencies declared in `package.json`.
+
+## About Hosting
+
+This service runs on Railway's infrastructure using the NIXPACKS builder. It requires an Apify API token for authentication. Once deployed, Railway assigns a public HTTPS URL that serves as your MCP endpoint.
+
+## Why Deploy
+
+- **Thousands of Actors** — Access the full [Apify Store](https://apify.com/store) of scrapers and automations  
+- **Bearer auth** — Secure your endpoint with your Apify API token  
+- **Zero configuration** — Deploy with just your APIFY_TOKEN  
+- **Always-on endpoint** — Your MCP server stays available whenever you need it  
+
+## Common Use Cases
+
+- **Web research** — Give Claude the ability to scrape Google, Amazon, Twitter, TikTok, and hundreds more  
+- **Data extraction** — Run Apify Actors on demand via MCP tools  
+- **AI assistant integration** — Connect Claude Desktop, Cursor, Windsurf, or any MCP client  
+- **Automated monitoring** — Schedule recurring scrapes through Apify's platform  
 
 ## How it works
 
 The Apify MCP Server provides a standardized MCP interface to the Apify platform. AI assistants use MCP tools to:
 
 - **Search & discover** Actors in the Apify Store
-- **Run Actors** with custom input — scrape Google, Amazon, Twitter, TikTok, and hundreds more
+- **Run Actors** with custom input
 - **Get results** — retrieve and inspect Actor run outputs
 - **Manage datasets** and scheduled tasks
 
@@ -43,43 +67,36 @@ Edit `~/.claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "apify": {
-      "type": "streamable-http",
-      "url": "https://<your-railway-url>.railway.app/",
+      "url": "https://your-railway-url.up.railway.app",
       "headers": {
-        "Authorization": "Bearer <apify-token>"
+        "Authorization": "Bearer YOUR_APIFY_TOKEN"
       }
     }
   }
 }
 ```
 
-Replace `<your-railway-url>` with your Railway deployment URL and `<apify-token>` with your Apify API token.
+Replace `YOUR_APIFY_TOKEN` with your actual Apify API token.
 
-#### Cursor / Windsurf / Other MCP Clients
+#### Cursor / Windsurf / Other Clients
 
-| Field | Value |
-|-------|-------|
-| Type | `streamable-http` |
-| URL | `https://<your-railway-url>.railway.app/` |
-| Headers | `{"Authorization": "Bearer <apify-token>"}` |
+Use the same URL and Bearer token pattern to configure your MCP client of choice.
 
-## Dependencies for Apify MCP Server
+### Testing the endpoint
 
-### Deployment Dependencies
+```bash
+curl -X POST https://your-railway-url.up.railway.app/health
+# {"status": "ok", "service": "apify-mcp-server"}
+```
 
-- **Apify API Token** — Required for authentication. Get it from [console.apify.com/settings/integrations](https://console.apify.com/settings/integrations)
-- **Node.js 24** — The server runs on Node 24 (Alpine) for optimal performance
+## Environment Variables
 
-## Technical Details
-
-- **Transport**: Streamable HTTP (MCP specification)
-- **Server package**: [`@apify/actors-mcp-server`](https://www.npmjs.com/package/@apify/actors-mcp-server) v0.13.0
-- **Source**: [github.com/apify/apify-mcp-server](https://github.com/apify/apify-mcp-server)
-- **Default port**: `8080` (overridable via `PORT` env var)
-- **Auth**: Bearer token in `Authorization` header
+| Variable       | Required | Description |
+|---------------|----------|-------------|
+| `APIFY_TOKEN` | Yes      | Your Apify API token. Get it from [Apify Console](https://console.apify.com/settings/integrations) |
 
 ## Resources
 
-- [Apify MCP Server Documentation](https://docs.apify.com/integrations/mcp)
+- [Apify MCP Server GitHub](https://github.com/apify/apify-mcp-server)
 - [Apify Store](https://apify.com/store)
-- [MCP Specification](https://modelcontextprotocol.io)
+- [Model Context Protocol](https://modelcontextprotocol.io)
